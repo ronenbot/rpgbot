@@ -21,6 +21,8 @@ bot = commands.Bot(command_prefix="$", description=description, intents=intents)
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user} (ID: {bot.user.id})")
+    channel = bot.get_channel(1270832902963466305)
+    await channel.send("I'm online!")
 
 
 @bot.command()
