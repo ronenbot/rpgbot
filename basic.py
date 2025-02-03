@@ -17,7 +17,7 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix="$", description=description, intents=intents)
 
-
+# when the bot signs in
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user} (ID: {bot.user.id})")
