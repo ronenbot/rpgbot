@@ -1,8 +1,6 @@
 # This example requires the 'members' privileged intents
 import random
 import itertools
-import sqlite3
-from bdb import Breakpoint
 from room import Room
 from character import Character
 from monster import Monster
@@ -10,18 +8,13 @@ import nextcord
 import botToken
 from nextcord.ext import commands
 
-description = """An example bot to showcase the nextcord.ext.commands extension
-module.
-
-There are a number of utility commands being showcased here."""
-
+description = "Eplore the Dungeon, fight monsters, find treasure and survive!"
 intents = nextcord.Intents.default()
 intents.members = True
 intents.message_content = True
 
 bot = commands.Bot(command_prefix="$", description=description, intents=intents)
 
-# when the bot signs in
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user} (ID: {bot.user.id})")
@@ -70,39 +63,18 @@ async def cool(ctx):
 async def _Ronen(ctx):
     """Is Ronen cool?"""
     await ctx.send("Yes, Ronen is cool.")
-
-def run():
-    # Run away from an attack
+async def run():
     print("You ran away to safety!")
-
-    # premade monsters
-goblin = Monster("Goblin", 10, 2, 1)
-orc = Monster("Orc", 15, 3, 2)
-skeleton = Monster("Skeleton", 5, 1, 0)
-
-
-def generate(self):
-    # Randomly select a room template
-    self.template = "monster"
-    # self.template = random.choice(["empty", "treasure", "monster", "puzzle"])
-
-    if self.template == "empty":
-        self.description = "You find yourself in an empty room."
-    elif self.template == "treasure":
-        self.description = "You find a chest filled with treasure!"
-        self.objects.append("chest")
-    elif self.template == "monster":
-        self.description = "You find a fearsome monster waiting for you!"
-        self.creatures.append("goblin")
-    elif self.template == "puzzle":
-        self.description = "You find a mysterious puzzle that needs to be solved."
-        self.features.append("puzzle")
-
-
-async def open_door(self, ctx):
-    self.generate()@bot.command(name='open')
+@bot.command(name='open')
 async def open(ctx, self=None):
-    await open_door.generate()
+    room = Room()
+    await open_door(ctx)
+def spawn(self) -> object:
+    # Spawn a new monster
+    self.name = random.choice(["goblin", "orc", "skeleton"])
+    return self.name
+async def open_door(self, ctx):
+    self.generate()
     await ctx.send(self.description)
 
     while True:
@@ -153,11 +125,4 @@ async def open(ctx, self=None):
             break
         else:
             await ctx.send("Invalid choice. Please try again.")
-
-
-@bot.command(name='open')
-async def open(ctx):
-    room = Room()
-    await room.open_door(ctx)
-
 bot.run(botToken.botToken)
