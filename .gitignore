@@ -1,0 +1,11 @@
+# file that contains secret
+botToken.py
+
+# file that contains old and outdated code
+basic.py
+main.py
+oldbot.py
+
+# database files
+basic.db
+main.db
