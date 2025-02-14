@@ -7,10 +7,11 @@ class Monster:
         self.attack = attack
         self.defense = defense
 
-    def spawn(self):
+    @staticmethod
+    def spawn():
         # Spawn a new monster
-        self.name = random.choice(["goblin", "orc", "skeleton"])
-        return self.name
+        name = random.choice(["goblin", "orc", "skeleton"])
+        return name
 
 # premade monsters
 goblin = Monster("Goblin", 10, 2, 1)

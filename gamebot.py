@@ -46,20 +46,61 @@ async def create(ctx):
 async def choose(ctx, *choices: str):
     """Chooses between multiple choices."""
     await ctx.send(random.choice(choices))
+@bot.command()
+async def roll(ctx, dice: str = "1d100"):
+    """Rolls a dice in NdN format. Defaults to 1d100 if no argument is provided."""
+    try:
+        if dice == "1d100":
+            result = random.randint(1, 100)
+        else:
+            rolls, limit = map(int, dice.split("d"))
+            result = [random.randint(1, limit) for _ in range(rolls)]
+            result = result[-1]  # Return the last roll result
+    except ValueError:
+        await ctx.send("Format has to be in NdN!") #ex: 1d20 rolls 1 d20
+        return
+
+    await ctx.send(f"Rolling {dice}: {result}")  # Send the roll result to the channel
+    return result
 async def open_door(ctx, room):
     print("open_door called")
     room.generate()
     await ctx.send(room.description)
 
     while True:
-        await ctx.send("What do you do?\n1. Fight\n2. Interact\n3. Explore\n4. RUN!")
+        await ctx.send("What do you do?\n1. Fight\n2. Loot\n3. Explore\n4. RUN!")
 
         def check(msg):
             return msg.author == ctx.author and msg.channel == ctx.channel
 
         msg = await bot.wait_for('message', check=check)
 
-        if msg.content == '1':
+        if room.template == "monster":
+            monster = Monster("Goblin", 10, 2, 1)
+            Monster.spawn()
+            if msg.content == '1':
+                await ctx.send(f"You engage in combat with the {monster.name}!")
+            elif msg.content == '2':
+                roll_result = await roll(ctx, "1d100")  # Roll a 1d100
+                roll_result = int(roll_result.split(" ")[-1])  # Extract the roll result
+                if roll_result >= 90:
+                    await ctx.send("Looting successful! You found some treasure!")
+                else:
+                    await ctx.send("Looting failed!")
+            elif msg.content == '3':
+                await ctx.send("You explore the room and find a hidden passage!")
+            elif msg.content == '4':
+                await run()
+        elif room.template == "treasure":
+            await ctx.send("There is no monster to fight here.")
+            break
+        elif room.template == "puzzle":
+            await ctx.send("You can't fight a puzzle.")
+            break
+        elif room.template == "empty":
+            await ctx.send("There is nothing to fight here.")
+            break
+        """if msg.content == '1':
             print(room.template)
             if room.template == "monster":
                 monster = Monster("Goblin", 10, 2, 1)
@@ -99,7 +140,7 @@ async def open_door(ctx, room):
             await ctx.send("You ran away to safety!")
             break
         else:
-            await ctx.send("Invalid choice. Please try again.")
+            await ctx.send("Invalid choice. Please try again.")"""
 @bot.command(name='open')
 async def open(ctx):
     print("open command called")

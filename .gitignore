@@ -9,3 +9,6 @@ oldbot.py
 # database files
 basic.db
 main.db
+
+# misc files
+.idea/
