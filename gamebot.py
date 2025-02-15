@@ -28,8 +28,37 @@ def create_character(user_id):
         'defense': 5
     }
     return character
-async def run():
-    print("You ran away to safety!")
+# Global variables
+user_attack = 10
+user_defense = 5
+user_health = 100
+
+# Monster variables
+monster_attack = 15
+monster_defense = 10
+monster_health = 50
+# Combat logic
+async def combat_logic(ctx):
+    global user_health, monster_health
+    # User attacks monster
+    monster_damage = max(0, user_attack - monster_defense)
+    monster_health -= monster_damage
+
+    # Monster attacks back
+    if monster_health > 0:
+        user_damage = max(0, monster_attack - user_defense)
+        user_health -= user_damage
+        await ctx.send("The monster dealt", user_damage, "damage to you!")
+
+    # Check if user or monster is dead
+    if user_health <= 0:
+        await ctx.send("You died!")
+    elif monster_health <= 0:
+        await ctx.send("You killed the monster!")
+
+@bot.command()
+async def run(ctx):
+    await ctx.send("You ran away to safety!")
 @bot.command()
 async def create(ctx):
     try:
@@ -54,13 +83,13 @@ async def roll(ctx, dice: str = "1d100"):
             result = random.randint(1, 100)
         else:
             rolls, limit = map(int, dice.split("d"))
-            result = [random.randint(1, limit) for _ in range(rolls)]
+            result = [random.randint(1, limit)]
             result = result[-1]  # Return the last roll result
     except ValueError:
         await ctx.send("Format has to be in NdN!") #ex: 1d20 rolls 1 d20
         return
 
-    await ctx.send(f"Rolling {dice}: {result}")  # Send the roll result to the channel
+    await ctx.send(str(result)) # Send the roll result to the channel
     return result
 async def open_door(ctx, room):
     print("open_door called")
@@ -80,67 +109,60 @@ async def open_door(ctx, room):
             Monster.spawn()
             if msg.content == '1':
                 await ctx.send(f"You engage in combat with the {monster.name}!")
+                await combat_logic(ctx)
             elif msg.content == '2':
-                roll_result = await roll(ctx, "1d100")  # Roll a 1d100
-                roll_result = int(roll_result.split(" ")[-1])  # Extract the roll result
+                roll_result = await roll(ctx)  # Roll a 1d100
                 if roll_result >= 90:
                     await ctx.send("Looting successful! You found some treasure!")
                 else:
                     await ctx.send("Looting failed!")
             elif msg.content == '3':
                 await ctx.send("You explore the room and find a hidden passage!")
-            elif msg.content == '4':
-                await run()
-        elif room.template == "treasure":
-            await ctx.send("There is no monster to fight here.")
-            break
-        elif room.template == "puzzle":
-            await ctx.send("You can't fight a puzzle.")
-            break
-        elif room.template == "empty":
-            await ctx.send("There is nothing to fight here.")
-            break
-        """if msg.content == '1':
-            print(room.template)
-            if room.template == "monster":
-                monster = Monster("Goblin", 10, 2, 1)
-                Monster.spawn()
-                await ctx.send(f"You engage in combat with the {monster.name}!")
-                # Add combat logic here
-            elif room.template == "treasure":
-                await ctx.send("There is no monster to fight here.")
-            elif room.template == "puzzle":
-                await ctx.send("You can't fight a puzzle.")
-            elif room.template == "empty":
-                await ctx.send("There is nothing to fight here.")
-        elif msg.content == '2':
-            if room.template == "treasure":
-                await ctx.send("You open the chest and find gold and treasure!")
                 break
-                # Add chest interaction logic here
-            elif room.template == "monster":
-                await ctx.send("There is no chest to interact with here.")
-            elif room.template == "puzzle":
-                await ctx.send("You can't interact with a puzzle.")
-            elif room.template == "empty":
-                await ctx.send("There is nothing to interact with here.")
-        elif msg.content == '3':
-            if room.template == "monster":
-                await ctx.send("You explore the room and find a hidden passage!")
-                # Add exploration logic here
-            elif room.template == "treasure":
+            elif msg.content == '4':
+                await ctx.invoke(bot.get_command('run'))
+                break
+            else:
+                await ctx.send("Invalid choice. Please try again.")
+        elif room.template == "treasure":
+            if msg.content == '1':
+                await ctx.send("You destroy the treasure.")
+                break
+            elif msg.content == '2':
+                await ctx.send("You open the chest and find gold and treasure!")
+            elif msg.content == '3':
                 await ctx.send("You explore the room and find a secret compartment in the chest!")
-                # Add exploration logic here
-            elif room.template == "puzzle":
+            elif msg.content == '4':
+                await ctx.invoke(bot.get_command('run'))
+                break
+            else:
+                await ctx.send("Invalid choice. Please try again.")
+        elif room.template == "puzzle":
+            if msg.content == '1':
+                await ctx.send("You destroy the puzzle.")
+                break
+            elif msg.content == '2':
+                await ctx.send("You try to solve the puzzle, but fail.")
+            elif msg.content == '3':
                 await ctx.send("You explore the room and find a hidden clue to the puzzle!")
-                # Add exploration logic here
-            elif room.template == "empty":
+            elif msg.content == '4':
+                await ctx.invoke(bot.get_command('run'))
+                break
+            else:
+                await ctx.send("Invalid choice. Please try again.")
+        elif room.template == "empty":
+            if msg.content == '1':
+                await ctx.send("There is nothing to fight here.")
+            elif msg.content == '2':
+                await ctx.send("There is nothing to interact with here.")
+            elif msg.content == '3':
                 await ctx.send("You explore the room, but there's nothing to find.")
-        elif msg.content == '4':
-            await ctx.send("You ran away to safety!")
-            break
-        else:
-            await ctx.send("Invalid choice. Please try again.")"""
+            elif msg.content == '4':
+                await ctx.invoke(bot.get_command('run'))
+                break
+            else:
+                await ctx.send("Invalid choice. Please try again.")
+
 @bot.command(name='open')
 async def open(ctx):
     print("open command called")

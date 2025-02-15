@@ -9,8 +9,8 @@ class Room:
 
     def generate(self):
         # Randomly select a room template
-        #self.template = "monster"
-        self.template = random.choice(["empty", "treasure", "monster", "puzzle"])
+        self.template = "monster"
+        #self.template = random.choice(["empty", "treasure", "monster", "puzzle"])
 
         if self.template == "empty":
             self.description = "You find yourself in an empty room."
